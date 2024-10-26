@@ -1,0 +1,160 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/media/favicon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            color: #333333;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            background-color: #f0f4f8;
+        }
+
+        header {
+            background-color: #006fba;
+            color: #ffffff;
+            font-size: 4em;
+            padding: 20px;
+        }
+
+        form {
+            background-color: #ffffff;
+            border: 1px solid #d1e0eb;
+            border-radius: 15px;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            padding: 30px 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            background-color: #f7fafc;
+            border: 1px solid #d1e0eb;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #006fba;
+            border: none;
+            border-radius: 5px;
+            width: 120px;
+            height: 40px;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005090; /* Darker shade for hover effect */
+        }
+
+        #encrypt, #decrypt {
+            display: none;
+        }
+    </style>
+    <title>Image Encryption</title>
+</head>
+
+<body>
+    <header>
+        Image Encryption
+    </header>
+
+    <br><button onclick="showEncryt()">Encrypt Image</button>
+    &emsp; &emsp; &emsp; &emsp;
+    <button onclick="showDecrypt()">Decrypt Image</button><br>
+
+    <br>Select AES Encryption Version<br>
+    <label>
+        <input type="radio" name="aes_type" value="128" onclick="updateKeyLength(32)" checked required> AES-128
+    </label>&emsp; &emsp;
+    <label>
+        <input type="radio" name="aes_type" value="192" onclick="updateKeyLength(48)" required> AES-192
+    </label>&emsp; &emsp;
+    <label>
+        <input type="radio" name="aes_type" value="256" onclick="updateKeyLength(64)" required> AES-256
+    </label><br><br>
+
+    <form id="encrypt" method="post" enctype="multipart/form-data" action="{% url 'cryptobox:encrypt' %}">
+        {% csrf_token %}
+        <label for="plain_image">Upload Image (JPG, PNG, GIF):</label>
+        <input type="file" id="plain_image" name="plain_image" accept=".jpg, .jpeg, .png, .gif" required>
+        <br>
+        <label for="encrypt_key">Key: </label>
+        <input type="text" id="encrypt_key" name="encrypt_key" maxlength="32" pattern="[0-9a-fA-F]{32}" required>
+        <i class="fas fa-key" id="generate-key-icon" style="cursor: pointer;"></i><br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <form id="decrypt" method="post" enctype="multipart/form-data" action="{% url 'cryptobox:decrypt' %}">
+        {% csrf_token %}
+        <label for="encrypted_file">Upload Encrypted File:</label>
+        <input type="file" id="encrypted_file" name="encrypted_file" accept=".bin" required>
+        <br>
+        <label for="decrypt_key">Key: </label>
+        <input type="text" id="decrypt_key" name="decrypt_key" maxlength="32" pattern="[0-9a-fA-F]{32}" required>
+        <i class='fas fa-key'></i><br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        function showEncryt() {
+            document.getElementById("encrypt").style.display = "block";
+            document.getElementById("decrypt").style.display = "none";
+        }
+
+        function showDecrypt() {
+            document.getElementById("encrypt").style.display = "none";
+            document.getElementById("decrypt").style.display = "block";
+        }
+
+        function updateKeyLength(length) {
+            let keyInput = document.getElementById("encrypt_key");
+            keyInput.setAttribute("maxlength", length);
+            keyInput.setAttribute("pattern", `[0-9a-fA-F]{${length}}`);
+
+            keyInput = document.getElementById("decrypt_key");
+            keyInput.setAttribute("maxlength", length);
+            keyInput.setAttribute("pattern", `[0-9a-fA-F]{${length}}`);
+        }
+
+        async function generateAESKey(length) {
+            const keyLength = length === 192 ? 256 : length;  // 
+            const key = await crypto.subtle.generateKey(
+                {
+                    name: "AES-GCM",    // Galois Counter Mode
+                    length: length === 192 ? 256 : length   // Generate 256-bit if 192 is selected. Key size (128 or 256)
+                },
+                true,                   // Key can be exported
+                ["encrypt", "decrypt"]  // Usages for the key
+            );
+            return key;
+        }
+
+        async function keyToHexString(key, targetLength) {
+            const exportedKey = await crypto.subtle.exportKey("raw", key);
+            let keyArray = new Uint8Array(exportedKey);
+
+            if (targetLength === 192) {
+                keyArray = keyArray.slice(0, 24);   // Keep first 24 bytes for 192 bits
+            }
+            return Array.from(keyArray).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        document.getElementById("generate-key-icon").addEventListener("click", async () => {
+            const selectedKeyLength = document.querySelector('input[name="aes_type"]:checked').value;
+            const key = await generateAESKey(parseInt(selectedKeyLength));
+            const hexKey = await keyToHexString(key, parseInt(selectedKeyLength));
+            document.getElementById("encrypt_key").value = hexKey;
+        });
+    </script>
+</body>
+
+</html>

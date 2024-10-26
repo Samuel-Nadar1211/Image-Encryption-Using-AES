@@ -1,0 +1,63 @@
+<!-- templates/error.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/media/favicon.png" type="image/png">
+    <style>
+        body {
+            color: #333333;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            background-color: #f0f4f8;
+        }
+
+        header {
+            background-color: #006fba;
+            color: #ffffff;
+            font-size: 4em;
+            padding: 20px;
+        }
+
+        .error-message {
+            background-color: #ffffff;
+            border: 1px solid #d1e0eb;
+            border-radius: 15px;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            padding: 30px 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #006fba;
+            border: none;
+            border-radius: 5px;
+            width: 120px;
+            height: 40px;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005090; /* Darker shade for hover effect */
+        }
+    </style>
+    <title>Error</title>
+</head>
+<body>
+    <header>Error</header>
+    <br>
+    <div class="error-message">
+        <p>
+            The encrypted file is corrupted or the key is wrong.
+        </p>
+        <button onclick="window.history.back()">Go Back</button>
+    </div>
+</body>
+</html>
