@@ -146,7 +146,7 @@ def invShiftRows(state):
 
 
 def xtime(x):
-    return ((x & 127) << 1) ^ ((x >> 7) & 1)
+    return ((x & 127) << 1) ^ ((x >> 7) & 1) * 0x1b
 
 def multiply(x, y):
     return (((y & 1) * x) ^

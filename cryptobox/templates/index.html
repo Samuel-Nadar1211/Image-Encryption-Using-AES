@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/media/favicon.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -52,10 +51,12 @@
         }
 
         button:hover {
-            background-color: #005090; /* Darker shade for hover effect */
+            background-color: #005090;
+            /* Darker shade for hover effect */
         }
 
-        #encrypt, #decrypt {
+        #encrypt,
+        #decrypt {
             display: none;
         }
     </style>
@@ -153,6 +154,30 @@
             const key = await generateAESKey(parseInt(selectedKeyLength));
             const hexKey = await keyToHexString(key, parseInt(selectedKeyLength));
             document.getElementById("encrypt_key").value = hexKey;
+        });
+
+        document.getElementById("encrypt").addEventListener("submit", function(event) {
+            const fileInput = document.getElementById("plain_image");
+            const filePath = fileInput.value;
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+
+            if (!allowedExtensions.exec(filePath)) {
+                alert("Please upload a jpg, png, or gif image only");
+                fileInput.value = '';       // Clear the file input
+                event.preventDefault();     // Prevent form submission
+            }
+        });
+
+        document.getElementById("decrypt").addEventListener("submit", function(event) {
+            const fileInput = document.getElementById("encrypted_file");
+            const filePath = fileInput.value;
+            const allowedExtensions = /.bin$/i;
+
+            if (!allowedExtensions.exec(filePath)) {
+                alert("Please upload the encrypted binary file");
+                fileInput.value = '';       // Clear the file input
+                event.preventDefault();     // Prevent form submission
+            }
         });
     </script>
 </body>
